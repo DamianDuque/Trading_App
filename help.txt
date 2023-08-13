@@ -1,0 +1,10 @@
+List of commands:
+    - QUIT: close session
+    - REQ: 
+        format: REQ -p <PERIOD> -f <FORMAT(CSV,JSON)> -m <PAR>
+    - SELL:
+        formar: SELL <PAR>
+    - BUY:
+        formar: BUY <PAR>
+    - LS: Lists all trading options
+    - HELP: Prints this message

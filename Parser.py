@@ -54,3 +54,17 @@ def buyStructure(list):
     if not is_number(list[3]):
         raise InvalidArgumentError(
             "number of actions to buy must be an integer")
+    
+
+def sellStructure(list):
+    if list[1] != "-m":
+        raise InvalidArgumentError("-m flag is missing")
+
+    else:
+        parOpt(list[2])
+    if not is_number(list[3]):
+        raise InvalidArgumentError(
+            "number of actions to sell must be an integer")
+
+def helpStructure(list):
+    print("Hola")
