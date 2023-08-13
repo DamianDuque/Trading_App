@@ -23,11 +23,6 @@ def edit_column(filename, columnNumber):
     # print(df)
 
 
-extraRow = ["2023-08-13-13:00", 1.374980, 1.375270, 1.372480, 1.373100, 60]
-add_row("test.csv", extraRow)
-edit_column("test.csv", 0)
-
-
 # Random numbers
 # periodPrices = []
 average = 0
@@ -43,9 +38,3 @@ def simulation(min, max, operations):
         i += 1
     average = count/(operations-2)
     return average
-
-
-simulation(1, 2, 5)
-average = round(average, 3)
-# print(periodPrices)
-print(average)
