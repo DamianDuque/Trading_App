@@ -1,6 +1,7 @@
 import plotly.graph_objects as go
 import pandas as pd
 from ManageFile import simulation
+import os
 
 
 def AddEdiCol(df):
@@ -12,7 +13,6 @@ def AddEdiCol(df):
     for i in range(len(df_num)):
         col.append(simulation(df_min[i], df_max[i], df_num[i]))
 
-    print(col)
     df["ValEd"] = col
 
     return df
@@ -52,4 +52,5 @@ def CsvToChart(path: str, sma: int):
     fig.add_trace(sma_trace)
     fig.add_trace(sma_trace_2)
 
-    fig.show()
+    img_path = 'img/{}.png' .format(os.path.splitext(path)[0])
+    fig.write_image(img_path)
