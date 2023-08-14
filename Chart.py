@@ -54,3 +54,8 @@ def CsvToChart(path: str, sma: int):
 
     img_path = 'img/{}.png' .format(os.path.splitext(path)[0])
     fig.write_image(img_path)
+
+
+path = input()
+sma = int(input())
+CsvToChart(path, sma)
