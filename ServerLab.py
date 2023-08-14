@@ -77,6 +77,11 @@ def handler_client_connection(client_connection, client_address):
             response = "-----Available PAR-----\n"+available+"-----"
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
+        elif (command == constants.HELP):
+            with open("help.txt", 'r', newline='') as f:
+                response = f.read()
+            client_connection.sendall(
+                response.encode(constants.ENCONDING_FORMAT))
 
         else:
             response = '400 BCMD\n\rCommand-Description: Bad command\n\r'

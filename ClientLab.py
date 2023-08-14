@@ -28,19 +28,23 @@ def main():
     list_commands = command_to_send.split()
 
     while command_to_send != constants.QUIT:
+        data_received = ""
+        data_received = data_received.encode(constants.ENCONDING_FORMAT)
         if command_to_send == '':
             print('Please input a valid command...')
-            command_to_send = input()
+            
         elif (list_commands[0] == constants.REQ):
             try:
                 reqStructure(list_commands)
                 client_socket.send(
                     bytes(command_to_send, constants.ENCONDING_FORMAT))
                 receive_image('prueba')
+                command_to_send = input()
+                continue
 
             except Exception as e:
                 print("\033[91mBad structure of command:\033[0m", e)
-            command_to_send = input()
+            
             list_commands = command_to_send.split()
         elif (list_commands[0] == constants.BUY):
             try:
@@ -49,7 +53,7 @@ def main():
                     bytes(command_to_send, constants.ENCONDING_FORMAT))
             except Exception as e:
                 print("\033[91mBad structure of command:\033[0m", e)
-            command_to_send = input()
+            
             list_commands = command_to_send.split()
         elif (list_commands[0] == constants.SELL):
             try:
@@ -58,7 +62,7 @@ def main():
                     bytes(command_to_send, constants.ENCONDING_FORMAT))
             except Exception as e:
                 print("\033[91mBad structure of command:\033[0m", e)
-            command_to_send = input()
+            
             list_commands = command_to_send.split()
         elif (list_commands[0] == constants.LIST):
             try:
@@ -67,7 +71,7 @@ def main():
                 data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
             except Exception as e:
                 print(e)
-            command_to_send = input()
+            
             list_commands = command_to_send.split()
         elif (list_commands[0] == constants.HELP):
             try:
@@ -76,14 +80,16 @@ def main():
                 data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
             except Exception as e:
                 print(e)
-            command_to_send = input() 
+            
+             
         else:
             client_socket.send(
                 bytes(command_to_send, constants.ENCONDING_FORMAT))
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
-            print(data_received.decode(constants.ENCONDING_FORMAT))
-            command_to_send = input()
-
+            
+        print(type(data_received))    
+        print(data_received.decode(constants.ENCONDING_FORMAT))
+        command_to_send = input()
     client_socket.send(bytes(command_to_send, constants.ENCONDING_FORMAT))
     data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
     print(data_received.decode(constants.ENCONDING_FORMAT))
