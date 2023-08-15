@@ -50,6 +50,7 @@ def handler_client_connection(client_connection, client_address):
                 response.encode(constants.ENCONDING_FORMAT))
             is_connected = False
         elif (command == constants.REQ):
+            print("Si pasa xd")
             response = imageSendData('descarga')
             client_connection.sendall(response)
             message = ""
