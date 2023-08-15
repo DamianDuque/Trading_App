@@ -3,12 +3,13 @@ import socket
 import threading
 import constants
 import os
+
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = constants.IP_SERVER
 
 
 def imageSendData(filename):
-    image_path = 'img/'+filename+'.png'
+    image_path = 'data/'+filename+'.png'
     with open(image_path, 'rb') as image_file:
         image_data = image_file.read()
     return image_data
@@ -35,49 +36,58 @@ def main():
 def handler_client_connection(client_connection, client_address):
     print(
         f'New incomming connection is coming from: {client_address[0]}:{client_address[1]}')
+
     is_connected = True
     while is_connected:
         data_recevived = client_connection.recv(constants.RECV_BUFFER_SIZE)
+
         if not data_recevived:
             is_connected = False
         remote_string = str(data_recevived.decode(constants.ENCONDING_FORMAT))
         remote_command = remote_string.split()
         command = remote_command[0]
         print(f'Data received from: {client_address[0]}:{client_address[1]}')
+
         if (command == constants.QUIT):
             response = '200 BYE\n'
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
             is_connected = False
+
         elif (command == constants.REQ):
-            print("Si pasa xd")
             response = imageSendData('descarga')
             client_connection.sendall(response)
             message = ""
             for x in range(1, len(remote_command)):
                 message += remote_command[x]+" "
             print("Command by client: "+message)
+
         elif (command == constants.BUY):
             response = "Successful purchase"
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
             message = ""
+
             for x in range(1, len(remote_command)):
                 message += remote_command[x]+" "
             print("Este es el mensaje que el cliente envió: "+message)
+
         elif (command == constants.SELL):
             response = "Successful sale"
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
             message = ""
+
             for x in range(1, len(remote_command)):
                 message += remote_command[x]+" "
             print("Este es el mensaje que el cliente envió: "+message)
+
         elif (command == constants.LIST):
             available = listFiles('data')
             response = "-----Available PAR-----\n"+available+"-----"
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
+
         elif (command == constants.HELP):
             with open("help.txt", 'r', newline='') as f:
                 response = f.read()

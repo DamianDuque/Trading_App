@@ -75,6 +75,8 @@ def CsvToChart(path: str):
 
     fig.write_image(img_path)
 
+    return img_path
+
 
 def test():
     path = input("Path: ")
