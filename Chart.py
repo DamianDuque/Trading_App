@@ -3,6 +3,8 @@ import pandas as pd
 from ManageFile import simulation
 import os
 
+# function to add column with the average of the generated random numbers
+
 
 def AddEdiCol(df):
     col = []
@@ -17,45 +19,63 @@ def AddEdiCol(df):
 
     return df
 
+# Function to make SMA line to a figure
 
-def CsvToChart(path: str, sma: int):
+
+def MakeTrace(df, refCol: str, color: str):
+    return go.Scatter(x=df['Date'], y=df[refCol],
+                      mode='lines', name=refCol, line_color=color)
+
+# Function to calculate SMA to a DataFrame column
+
+
+def CalcSMA(df, refCol: str, saveCol: str, sma: int):
+    df[saveCol] = df[refCol].rolling(sma).mean()
+    df[saveCol].fillna(df[refCol], inplace=True)
+
+    return df
+
+# Function to create chart with data
+
+
+def CsvToChart(path: str):
     column_names = ['Date', 'Open', 'High', 'Low', 'Close', 'Number']
 
     try:
         df = pd.read_csv(path, names=column_names)
-    except ValueError as er:
-        print(er)
+    except Exception as ex:
+        print(ex)
         return
 
+    _, img_name = os.path.split(path)
+    img_name = img_name.split('.')[0]
+    img_path = 'img/{}.png' .format(img_name)
     df = AddEdiCol(df)
-
-    df['SMA'] = df['Close'].rolling(sma).mean()
-
-    df['SMAE'] = df['ValEd'].rolling(sma).mean()
-
-    df['SMA'].fillna(df['Close'], inplace=True)
-
-    df['SMAE'].fillna(df['ValEd'], inplace=True)
+    df = CalcSMA(df, 'Close', 'SMA-5', 5)
+    df = CalcSMA(df, 'Close', 'SMA-13', 13)
+    df = CalcSMA(df, 'ValEd', 'SMA-E', 5)
 
     fig = go.Figure(data=[go.Candlestick(x=df['Date'],
                                          open=df['Open'],
                                          high=df['High'],
                                          low=df['Low'],
-                                         close=df['Close'])])
+                                         close=df['Close'],
+                                         name="Candlestick")])
 
-    sma_trace = go.Scatter(x=df['Date'], y=df['SMA'],
-                           mode='lines', name='SMA', line_color=' blue')
-
-    sma_trace_2 = go.Scatter(x=df['Date'], y=df['SMAE'],
-                             mode='lines', name='SMAE', line_color='purple')
+    sma_trace = MakeTrace(df, 'SMA-5', 'blue')
+    sma_trace_2 = MakeTrace(df, 'SMA-13', 'purple')
+    sma_trace_3 = MakeTrace(df, 'SMA-E', 'gray')
 
     fig.add_trace(sma_trace)
     fig.add_trace(sma_trace_2)
+    fig.add_trace(sma_trace_3)
+    fig.update_layout(
+        title=dict(text=img_name, font=dict(size=30))
+    )
 
-    img_path = 'img/{}.png' .format(os.path.splitext(path)[0])
     fig.write_image(img_path)
 
 
-path = input()
-sma = int(input())
-CsvToChart(path, sma)
+def test():
+    path = input("Path: ")
+    CsvToChart(path)
