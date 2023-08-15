@@ -1,26 +1,41 @@
 import Chart as ch
 import socket
+import pickle
+import struct
 import threading
 import constants
 import os
+import cv2
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = constants.IP_SERVER
 
 
+def getExt(fmt: str):
+    return "." + fmt.lower()
+
+
 def imageSendData(filename):
-    image_path = 'data/'+filename+'.png'
-    with open(image_path, 'rb') as image_file:
-        image_data = image_file.read()
-    return image_data
+    image_path = ch.CsvToChart(filename)
+    frame = cv2.imread(image_path)
+    data = pickle.dumps(frame)
+
+    message_size = struct.pack("L", len(data))
+
+    return message_size, data
 
 
 def listFiles(directory):
     files = ""
+    name_set = set()
     for filename in os.listdir(directory):
         if os.path.isfile(os.path.join(directory, filename)):
-            files += filename+"\n"
-    return files
+            filename = filename.split(".")[0]
+            filename = filename.split("_")[0]
+            if filename not in name_set:
+                files += filename+"\n"
+                name_set.add(filename)
+    return files, name_set
 
 
 def main():
@@ -55,9 +70,12 @@ def handler_client_connection(client_connection, client_address):
             is_connected = False
 
         elif (command == constants.REQ):
-            response = imageSendData('descarga')
-            client_connection.sendall(response)
+            size, response = imageSendData(
+                "data/"+remote_command[6]+getExt(remote_command[4]))
+
+            client_connection.sendall(size + response)
             message = ""
+
             for x in range(1, len(remote_command)):
                 message += remote_command[x]+" "
             print("Command by client: "+message)
@@ -83,7 +101,7 @@ def handler_client_connection(client_connection, client_address):
             print("Este es el mensaje que el cliente envió: "+message)
 
         elif (command == constants.LIST):
-            available = listFiles('data')
+            available, _ = listFiles('data')
             response = "-----Available PAR-----\n"+available+"-----"
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
