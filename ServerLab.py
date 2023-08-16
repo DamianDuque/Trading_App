@@ -15,14 +15,21 @@ def getExt(fmt: str):
     return "." + fmt.lower()
 
 
-def imageSendData(filename):
-    image_path = ch.CsvToChart(filename)
+def imageSendData(filename, fmt):
+    image_path = ch.fileToChart(filename, fmt)
     frame = cv2.imread(image_path)
     data = pickle.dumps(frame)
 
     message_size = struct.pack("L", len(data))
 
     return message_size, data
+
+
+def requestData(reqCmd: list):
+    if len(reqCmd) == 7:
+        return reqCmd[2], reqCmd[4], reqCmd[6]
+    else:
+        return "H1", reqCmd[2], reqCmd[4]
 
 
 def listFiles(directory):
@@ -70,8 +77,11 @@ def handler_client_connection(client_connection, client_address):
             is_connected = False
 
         elif (command == constants.REQ):
-            size, response = imageSendData(
-                "data/"+remote_command[6]+getExt(remote_command[4]))
+            period, fmt, par = requestData(remote_command)
+            ext = getExt(fmt)
+            filename = par + "_" + period
+
+            size, response = imageSendData("data/" + filename + ext, fmt)
 
             client_connection.sendall(size + response)
             message = ""

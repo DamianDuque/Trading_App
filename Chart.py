@@ -1,7 +1,8 @@
-import plotly.graph_objects as go
-import pandas as pd
-from ManageFile import simulation
 import os
+import json
+import pandas as pd
+import plotly.graph_objects as go
+from ManageFile import simulation
 
 # function to add column with the average of the generated random numbers
 
@@ -35,14 +36,40 @@ def CalcSMA(df, refCol: str, saveCol: str, sma: int):
 
     return df
 
+
+def jsonToDf(path):
+    column_names = ['Date', 'Open', 'High', 'Low', 'Close', 'Number']
+
+    f = open(path)
+
+    data = json.load(f)
+
+    df = pd.DataFrame(list(zip(data['time'], data['open'], data['high'],
+                      data['low'], data['close'], data['volume'])),
+                      columns=column_names)
+
+    df['Date'] = pd.to_datetime(df['Date'],
+                                unit='s', origin='2000-1-1')
+    return df
+
+
+# jsonToDf("data/USA30IDXUSD_D1.json")
+
+
+def csvToDf(path):
+    column_names = ['Date', 'Open', 'High', 'Low', 'Close', 'Number']
+    return pd.read_csv(path, names=column_names)
+
 # Function to create chart with data
 
 
-def CsvToChart(path: str):
-    column_names = ['Date', 'Open', 'High', 'Low', 'Close', 'Number']
+def fileToChart(path: str, fmt: str):
 
     try:
-        df = pd.read_csv(path, names=column_names)
+        if fmt == "CSV":
+            df = csvToDf(path)
+        elif fmt == "JSON":
+            df = jsonToDf(path)
     except Exception as ex:
         print(ex)
         return
@@ -70,7 +97,8 @@ def CsvToChart(path: str):
     fig.add_trace(sma_trace_2)
     fig.add_trace(sma_trace_3)
     fig.update_layout(
-        title=dict(text=img_name, font=dict(size=30))
+        title=dict(text=img_name, font=dict(size=30)),
+        xaxis_rangeslider_visible=False
     )
 
     fig.write_image(img_path)
@@ -80,4 +108,4 @@ def CsvToChart(path: str):
 
 def test():
     path = input("Path: ")
-    CsvToChart(path)
+    fileToChart(path)

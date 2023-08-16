@@ -9,6 +9,7 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
 def receive_image(name, data, msg_size):
+    cv2.destroyAllWindows()
     frame_data = data[:msg_size]
     data = data[msg_size:]
 
@@ -16,10 +17,9 @@ def receive_image(name, data, msg_size):
     downloads_directory = os.path.expanduser("~/Downloads")
     image_path = os.path.join(downloads_directory, name+'.jpg')
 
-    cv2.imshow('image',image_data)
+    cv2.imshow('image', image_data)
+    cv2.imwrite(image_path, image_data)
     cv2.waitKey(0)
-    # with open(image_path, 'wb') as image_file:
-    #     image_file.write(image_data)
 
     print(f'Image received and saved as "{image_path}"')
 
@@ -44,7 +44,6 @@ def main():
         elif (list_commands[0] == constants.REQ):
             try:
                 reqStructure(list_commands)
-                print(list_commands)
             except Exception as e:
                 print("\033[91mBad structure of command:\033[0m", e)
                 command_to_send = input()
@@ -53,11 +52,11 @@ def main():
 
             client_socket.send(
                 bytes(command_to_send, constants.ENCONDING_FORMAT))
+            print("Loading image....")
             data = b''
             payload_size = struct.calcsize('L')
 
             while len(data) < payload_size:
-                print('a')
                 data += client_socket.recv(4096)
             packed_msg_size = data[:payload_size]
             data = data[payload_size:]
