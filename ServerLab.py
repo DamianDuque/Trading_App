@@ -77,18 +77,18 @@ def handler_client_connection(client_connection, client_address):
             is_connected = False
 
         elif (command == constants.REQ):
+            print("Command by client: " + remote_string)
+
             period, fmt, par = requestData(remote_command)
             ext = getExt(fmt)
             filename = par + "_" + period
 
             size, response = imageSendData("data/" + filename + ext, fmt)
 
+            print("Sending image...")
             client_connection.sendall(size + response)
-            message = ""
+            print("Image Sent")
 
-            for x in range(1, len(remote_command)):
-                message += remote_command[x]+" "
-            print("Command by client: "+message)
 
         elif (command == constants.BUY):
             response = "Successful purchase"

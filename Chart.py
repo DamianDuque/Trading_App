@@ -74,6 +74,7 @@ def fileToChart(path: str, fmt: str):
         print(ex)
         return
 
+    print("Processing image...")
     _, img_name = os.path.split(path)
     img_name = img_name.split('.')[0]
     img_path = 'img/{}.png' .format(img_name)
