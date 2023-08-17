@@ -3,11 +3,14 @@ import csv
 import pandas as pd
 from datetime import datetime
 import random
+import os
 
 REQCOMMAND = ["REQ", "-p", "<PERIOD>", "-f",
               "<FORMAT(CSV,JSON)>", "-m", "<PAR>"]
 #print(REQCOMMAND)
 colum_names = ["Date", "Open", "High", "Low", "Close", "Number"]
+ruta = os.path.abspath("data")
+newRow = [0,0,0,0,0,0]
 
 periods = {
     "M1": "0:01:00",
@@ -28,6 +31,97 @@ conversionRates = {
     "H4-M1": "Invalid", "H4-M5": "Invalid", "H4-M15": "Invalid", "H4-M30": "Invalid", "H4-H1": "Invalid", "H4-H4": 1, "H4-D1": 6,
     "D1-M1": "Invalid", "D1-M5": "Invalid", "D1-M15": "Invalid", "D1-M30": "Invalid", "D1-H1": "Invalid", "D1-H4": "Invalid", "D1-D1": 1,
 }
+
+
+def editCSV(filenames, operationType):
+    priceUpdate = 10
+    validperiods = periods.keys()
+    validperiodsList = list(validperiods)
+    i = 0
+    while i < 7:
+        df = pd.read_csv(os.path.join(ruta, filenames + "_" +validperiodsList[i]+ ".csv"), names=colum_names)
+        stringFormat = "%Y-%m-%d %H:%M"
+        print(df)
+        date1 = df.loc[len(df.index)-1, 'Date']
+        date1_obj = datetime.strptime(date1, stringFormat)
+        date2 = datetime.now()
+        dt_string = date2.strftime("%Y-%m-%d %H:%M")
+
+        time_passed = date2 - date1_obj
+        days = time_passed.days
+        seconds = time_passed.seconds
+        print(days,seconds)
+        if days >=1: 
+            sameLine = False
+        else:
+            if seconds >= 60 and i == 0:
+                sameLine = False
+            elif seconds >= 300 and i == 1:
+                sameLine = False
+            elif seconds >= 900 and i == 2:
+                sameLine = False
+            elif seconds >= 1800 and i == 3:
+                sameLine = False
+            elif seconds >= 3600 and i == 4:
+                sameLine = False
+            elif seconds >= 14400 and i == 5:
+                sameLine = False
+            elif seconds >= 3600 and i == 4:
+                sameLine = False
+            elif seconds >= 86400 and i == 4:
+                sameLine = False
+            else:
+                sameLine = True
+
+        if sameLine == True:
+            currentRow = df.loc[0]
+            newRow[0] = currentRow[0]
+            newRow[1] = currentRow[1]
+
+            if operationType == "BUY":
+                newRow[2] = currentRow[2] + priceUpdate
+                newRow[3] = currentRow[3]
+                newRow[4] = newRow[2] 
+            else: 
+                newRow[2] = currentRow[2]
+                newRow[3] = currentRow[3] - priceUpdate
+                newRow[4] = newRow[3] 
+
+            newRow[5] = currentRow[5] + 1
+            print(newRow)
+
+            with open(os.path.join(ruta, filenames + "_" +validperiodsList[i]+ ".csv"), 'a', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(newRow)
+
+        else:
+            currentRow = df.loc[0]
+            newRow[0] = dt_string
+            newRow[1] = currentRow[4]
+
+            if operationType == "BUY":
+                newRow[2] = currentRow[4] + priceUpdate
+                newRow[3] = newRow[2]
+                newRow[4] = newRow[2] 
+            else: 
+                newRow[2] = currentRow[4]
+                newRow[3] = newRow[2] - priceUpdate
+                newRow[4] = newRow[3] 
+
+            newRow[5] = currentRow[5]
+            print(newRow)
+
+            with open(os.path.join(ruta, filenames + "_" +validperiodsList[i]+ ".csv"), 'a', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(newRow)
+
+
+
+        print("period ", i, "ready")
+        print(validperiodsList[i])
+        i=i+1
+        
+
 
 
 def findPeriod(filename, columnNumber):
@@ -142,3 +236,9 @@ def simulation(min, max, operations):
     return average
 
 # scaleFile([1,1,1,1,1],"data.csv",0)
+
+# date2 = datetime.now()
+# dt_string = date2.strftime("%Y:%m:%d %H:%M")
+# print(dt_string)
+
+editCSV("BTCUSD", "BUY")

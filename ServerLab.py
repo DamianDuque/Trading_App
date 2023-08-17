@@ -1,4 +1,5 @@
 import Chart as ch
+import ManageFile as MF
 import socket
 import pickle
 import struct
@@ -13,6 +14,11 @@ server_address = constants.IP_SERVER
 
 def getExt(fmt: str):
     return "." + fmt.lower()
+
+def transactions(filenames, operationType):
+    price = MF.editCSV(filenames,operationType)
+    return price
+    
 
 
 def imageSendData(filename, fmt):
@@ -30,6 +36,9 @@ def requestData(reqCmd: list):
         return reqCmd[2], reqCmd[4], reqCmd[6]
     else:
         return "H1", reqCmd[2], reqCmd[4]
+    
+def requestTransactionInfo(reqCmd: list):
+    return reqCmd[2], reqCmd[3]
 
 
 def listFiles(directory):
@@ -91,7 +100,13 @@ def handler_client_connection(client_connection, client_address):
 
 
         elif (command == constants.BUY):
-            response = "Successful purchase"
+            print("Command by client: " + remote_string)
+            par, amount = requestTransactionInfo(remote_command)
+            
+            filenames = par + "-"
+            operationType = "BUY"
+            price = transactions()
+            response = "You bought at" + str(price)
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
             message = ""
