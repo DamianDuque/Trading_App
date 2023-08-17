@@ -1,17 +1,26 @@
 import socket
+import pickle
+import struct
 import constants
+import cv2
+from matplotlib import pyplot as plt
 from Parser import *
 import os
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
-def receive_image(name):
-    image_data = client_socket.recv(constants.RECV_BUFFER_SIZE)
-    downloads_directory = os.path.expanduser("~/Downloads")
-    image_path = os.path.join(downloads_directory, name+'.jpg')
+def receive_image(name, data, msg_size):
+    print("Image received")
+    frame_data = data[:msg_size]
+    data = data[msg_size:]
 
-    with open(image_path, 'wb') as image_file:
-        image_file.write(image_data)
+    image_data = pickle.loads(frame_data)
+    downloads_directory = os.path.expanduser("~/Downloads")
+    image_path = os.path.join(downloads_directory, name + '.jpg')
+
+    plt.imshow(image_data)
+    plt.show()
+    cv2.imwrite(image_path, image_data)
 
     print(f'Image received and saved as "{image_path}"')
 
@@ -44,7 +53,23 @@ def main():
 
             client_socket.send(
                 bytes(command_to_send, constants.ENCONDING_FORMAT))
-            receive_image('prueba')
+            print("Loading image....")
+            data = b''
+            payload_size = struct.calcsize('L')
+
+            while len(data) < payload_size:
+                data += client_socket.recv(4096)
+            packed_msg_size = data[:payload_size]
+            data = data[payload_size:]
+
+            msg_size = struct.unpack('L', packed_msg_size)[0]
+            # Retrieve all data based on message size
+            while len(data) < msg_size:
+                data += client_socket.recv(4096)
+
+            img_name = list_commands[-1]
+            receive_image(img_name, data, msg_size)
+
         elif (list_commands[0] == constants.BUY):
             try:
                 buyStructure(list_commands)
