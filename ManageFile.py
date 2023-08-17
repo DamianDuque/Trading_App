@@ -6,7 +6,7 @@ import random
 
 REQCOMMAND = ["REQ", "-p", "<PERIOD>", "-f",
               "<FORMAT(CSV,JSON)>", "-m", "<PAR>"]
-# print(REQCOMMAND)
+#print(REQCOMMAND)
 colum_names = ["Date", "Open", "High", "Low", "Close", "Number"]
 
 periods = {
@@ -68,6 +68,8 @@ def findConversionRate(conversion):
         conversionRate = ratesValuesList[position]
 
         return conversionRate
+
+
 
 
 def scaleFile(REQCOMMAND, filename, columnNumber):

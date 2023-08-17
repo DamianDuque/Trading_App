@@ -81,3 +81,5 @@ def CsvToChart(path: str):
 def test():
     path = input("Path: ")
     CsvToChart(path)
+
+test()
