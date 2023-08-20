@@ -41,7 +41,7 @@ def editCSV(filenames, operationType):
     while i < 7:
         df = pd.read_csv(os.path.join(ruta, filenames + "_" +validperiodsList[i]+ ".csv"), names=colum_names)
         stringFormat = "%Y-%m-%d %H:%M"
-        print(df)
+        #print(df)
         date1 = df.loc[len(df.index)-1, 'Date']
         date1_obj = datetime.strptime(date1, stringFormat)
         date2 = datetime.now()
@@ -50,7 +50,7 @@ def editCSV(filenames, operationType):
         time_passed = date2 - date1_obj
         days = time_passed.days
         seconds = time_passed.seconds
-        print(days,seconds)
+        #print(days,seconds)
         if days >=1: 
             sameLine = False
         else:
@@ -74,155 +74,77 @@ def editCSV(filenames, operationType):
                 sameLine = True
 
         if sameLine == True:
-            currentRow = df.loc[0]
+            currentRow = df.loc[len(df.index)-1]
             newRow[0] = currentRow[0]
             newRow[1] = currentRow[1]
+            price = currentRow[4]
 
             if operationType == "BUY":
-                newRow[2] = currentRow[2] + priceUpdate
-                newRow[3] = currentRow[3]
-                newRow[4] = newRow[2] 
+                newRow[4] = float(currentRow[4]) + priceUpdate
+                if newRow[4] > float(currentRow[2]):
+                    newRow[2] = newRow[4]
+                    newRow[3] = currentRow[3]
+                else:
+                    newRow[2] = currentRow[2]
+                    newRow[3] = currentRow[3]
             else: 
-                newRow[2] = currentRow[2]
-                newRow[3] = currentRow[3] - priceUpdate
-                newRow[4] = newRow[3] 
+                newRow[4] = float(currentRow[4]) - priceUpdate
+                if newRow[4] < float(currentRow[3]):
+                    newRow[2] = newRow[2]
+                    newRow[3] = newRow[4]
+                else:
+                    newRow[2] = currentRow[2]
+                    newRow[3] = currentRow[3]
 
-            newRow[5] = currentRow[5] + 1
+            newRow[5] = int(currentRow[5]) + 1
             print(newRow)
+            #print(df)
+            df.iloc[-1] = newRow
+            df = df.drop_duplicates()
+            df = df.drop(0)
+            print(df)
+            #print("Reformed df:")
+            #print(df)
+            #df.loc[df.shape[0]]  = newRow
+            #print("Final df")
+            #print(df)
+            df.iloc[-1] = newRow
+            #print(df)
+            df.to_csv(os.path.join(ruta, filenames + "_" +validperiodsList[i]+ ".csv"), index=False)
 
-            with open(os.path.join(ruta, filenames + "_" +validperiodsList[i]+ ".csv"), 'a', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow(newRow)
+            # with open(os.path.join(ruta, filenames + "_" +validperiodsList[i]+ ".csv"), 'a', newline='') as f:
+            #     writer = csv.writer(f)
+            #     writer.writerow(newRow)
 
         else:
-            currentRow = df.loc[0]
+            currentRow = df.loc[len(df.index)-1]
+            #print(currentRow)
             newRow[0] = dt_string
             newRow[1] = currentRow[4]
+            price = currentRow[4]
 
             if operationType == "BUY":
-                newRow[2] = currentRow[4] + priceUpdate
-                newRow[3] = newRow[2]
-                newRow[4] = newRow[2] 
+                newRow[2] = float(currentRow[4]) + priceUpdate
+                newRow[3] = newRow[1]
+                newRow[4] = newRow[2]
             else: 
-                newRow[2] = currentRow[4]
-                newRow[3] = newRow[2] - priceUpdate
-                newRow[4] = newRow[3] 
+                newRow[2] = newRow[1]
+                newRow[3] = float(newRow[1]) - priceUpdate
+                newRow[4] = newRow[3]
 
-            newRow[5] = currentRow[5]
-            print(newRow)
+            newRow[5] = 1
 
-            with open(os.path.join(ruta, filenames + "_" +validperiodsList[i]+ ".csv"), 'a', newline='') as f:
+            with open(os.path.join(ruta, filenames + "_" + validperiodsList[i] + ".csv"), 'a', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(newRow)
 
 
-
-        print("period ", i, "ready")
-        print(validperiodsList[i])
+        newPrice = newRow[4]
+        #print("period ", i, "ready")
+        #print(validperiodsList[i])
         i=i+1
-        
 
-
-
-def findPeriod(filename, columnNumber):
-    stringFormat = "%Y-%m-%d %H:%M"
-    validperiods = periods.keys()
-    validResults = periods.values()
-    validperiodsList = list(validperiods)
-    validResultsList = list(validResults)
-
-    df = pd.read_csv(filename, names=colum_names)
-    date1 = df.loc[columnNumber, 'Date']
-    date2 = df.loc[columnNumber+1, 'Date']
-    date1_obj = datetime.strptime(date1, stringFormat)
-    date2_obj = datetime.strptime(date2, stringFormat)
-    difference = date2_obj-date1_obj
-    backtostr = str(difference)
-    if backtostr in validResultsList:
-        position = validResultsList.index(backtostr)
-        filePeriod = validperiodsList[position]
-    else:
-        filePeriod = "Invalid period"
-        print(filePeriod)
-        exit()
-
-    return filePeriod
-
-
-def findConversionRate(conversion):
-    ratesKeys = conversionRates.keys()
-    ratesValues = conversionRates.values()
-    ratesKeysList = list(ratesKeys)
-    ratesValuesList = list(ratesValues)
-    print(ratesKeysList)
-    print(ratesValuesList)
-
-    if conversion in ratesKeysList:
-        position = ratesKeysList.index(conversion)
-        conversionRate = ratesValuesList[position]
-
-        return conversionRate
-
-
-
-
-def scaleFile(REQCOMMAND, filename, columnNumber):
-    with open("newFile.csv", 'w') as f:
-        print("New file created")
-
-    if REQCOMMAND[1] == "-p":
-        timePeriod = REQCOMMAND[2]
-    else:
-        timePeriod = "H1"
-
-    df = pd.read_csv(filename, names=colum_names)  # Archivo original
-    print(df)
-    # test = len(df.index)
-    # print(test)
-
-    filePeriod = findPeriod(filename, columnNumber)
-    # print(filePeriod)
-    conversion = filePeriod + "-" + timePeriod
-    # print(conversion)
-
-    conversionRate = findConversionRate(conversion)
-    # print(conversionRate)
-
-    i = 0
-
-    newrow = [0, 0, 0, 0, 0, 0]
-    counter = 0
-    while i < len(df.index):
-        currentRow = df.loc[i]
-        if counter == 0:
-            newrow[0] = currentRow.Date
-            newrow[1] = currentRow.Open
-            newrow[2] = currentRow.High
-            newrow[3] = currentRow.Low
-            newrow[5] = 0
-
-        if currentRow.High > newrow[2]:
-            newrow[2] = currentRow.High
-
-        if currentRow.Low < newrow[3]:
-            newrow[2] = currentRow.Low
-
-        newrow[4] = currentRow.Close
-
-        newrow[5] = newrow[5] + currentRow.Number
-
-        print(currentRow)
-        print(newrow)
-        i += 1
-        print(i)
-        counter += 1
-
-        if counter == conversionRate or i == len(df.index):
-            with open("newFile.csv", 'a', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow(newrow)
-                counter = 0
-
+    return price, newPrice
 
 def simulation(min, max, operations):
     average = 0
@@ -235,10 +157,5 @@ def simulation(min, max, operations):
     average = count/(operations-2)
     return average
 
-# scaleFile([1,1,1,1,1],"data.csv",0)
 
-# date2 = datetime.now()
-# dt_string = date2.strftime("%Y:%m:%d %H:%M")
-# print(dt_string)
-
-editCSV("BTCUSD", "BUY")
+editCSV("BTCUSD", "SELL")

@@ -16,8 +16,8 @@ def getExt(fmt: str):
     return "." + fmt.lower()
 
 def transactions(filenames, operationType):
-    price = MF.editCSV(filenames,operationType)
-    return price
+    price, newPrice = MF.editCSV(filenames,operationType)
+    return price, newPrice
     
 
 
@@ -102,11 +102,10 @@ def handler_client_connection(client_connection, client_address):
         elif (command == constants.BUY):
             print("Command by client: " + remote_string)
             par, amount = requestTransactionInfo(remote_command)
-            
-            filenames = par + "-"
+
             operationType = "BUY"
-            price = transactions()
-            response = "You bought at" + str(price)
+            price, newPrice = transactions(par, operationType)
+            response = "You bought at: " + str(price) + " and The current price of the stock is: " + str(newPrice) + " ↑"
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
             message = ""
@@ -116,7 +115,12 @@ def handler_client_connection(client_connection, client_address):
             print("Este es el mensaje que el cliente envió: "+message)
 
         elif (command == constants.SELL):
-            response = "Successful sale"
+            print("Command by client: " + remote_string)
+            par, amount = requestTransactionInfo(remote_command)
+
+            operationType = "SELL"
+            price, newPrice = transactions(par, operationType)
+            response = "You sold at: " + str(price) + " and The current price of the stock is: " + str(newPrice) + " ↓"
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
             message = ""

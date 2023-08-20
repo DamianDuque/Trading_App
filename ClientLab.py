@@ -3,6 +3,7 @@ import pickle
 import struct
 import constants
 import cv2
+from colorama import Fore
 from matplotlib import pyplot as plt
 from Parser import *
 import os
@@ -75,6 +76,7 @@ def main():
                 buyStructure(list_commands)
                 client_socket.send(
                     bytes(command_to_send, constants.ENCONDING_FORMAT))
+                data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
             except Exception as e:
                 print("\033[91mBad structure of command:\033[0m", e)
 
@@ -83,6 +85,7 @@ def main():
                 buyStructure(list_commands)
                 client_socket.send(
                     bytes(command_to_send, constants.ENCONDING_FORMAT))
+                data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
             except Exception as e:
                 print("\033[91mBad structure of command:\033[0m", e)
 
