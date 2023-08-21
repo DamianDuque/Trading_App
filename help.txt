@@ -3,8 +3,8 @@ List of commands:
     - REQ: 
         format: REQ -p <PERIOD> -f <FORMAT(CSV,JSON)> -m <PAR>
     - SELL:
-        format: SELL <PAR>
+        format: SELL -m <PAR>
     - BUY:
-        format: BUY <PAR> <AMOUNT>
+        format: BUY -m <PAR> <AMOUNT>
     - LS: Lists all trading options
     - HELP: Prints this message

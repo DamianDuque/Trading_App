@@ -6,7 +6,6 @@ import struct
 import threading
 import constants
 import os
-import cv2
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = constants.IP_SERVER
@@ -17,8 +16,8 @@ def getExt(fmt: str):
 
 
 def transactions(filenames, operationType):
-    price = MF.editCSV(filenames, operationType)
-    return price
+    price, newPrice = MF.editCSV(filenames, operationType)
+    return price, newPrice
 
 
 def imageSendData(filename, fmt):
@@ -103,10 +102,11 @@ def handler_client_connection(client_connection, client_address):
             print("Command by client: " + remote_string)
             par, amount = requestTransactionInfo(remote_command)
 
-            filenames = par + "-"
             operationType = "BUY"
-            price = transactions()
-            response = "You bought at" + str(price)
+            price, newPrice = transactions(par, operationType)
+            response = "You bought at: " + \
+                str(price) + " and The current price of the stock is: " + \
+                str(newPrice) + " ↑"
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
             message = ""
@@ -116,7 +116,14 @@ def handler_client_connection(client_connection, client_address):
             print("Este es el mensaje que el cliente envió: "+message)
 
         elif (command == constants.SELL):
-            response = "Successful sale"
+            print("Command by client: " + remote_string)
+            par, amount = requestTransactionInfo(remote_command)
+
+            operationType = "SELL"
+            price, newPrice = transactions(par, operationType)
+            response = "You sold at: " + \
+                str(price) + " and The current price of the stock is: " + \
+                str(newPrice) + " ↓"
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
             message = ""
