@@ -109,7 +109,7 @@ def diffRow(df, operationType, dt_string, priceUpdate, filenames, validperiodsLi
 
 
 def editCSV(filenames, operationType):
-    priceUpdate = 10
+    priceUpdate = 1
     validperiods = periods.keys()
     validperiodsList = list(validperiods)
     i = 0
