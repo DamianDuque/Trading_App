@@ -15,16 +15,16 @@ server_address = constants.IP_SERVER
 def getExt(fmt: str):
     return "." + fmt.lower()
 
+
 def transactions(filenames, operationType):
-    price = MF.editCSV(filenames,operationType)
+    price = MF.editCSV(filenames, operationType)
     return price
-    
 
 
 def imageSendData(filename, fmt):
-    image_path = ch.fileToChart(filename, fmt)
-    frame = cv2.imread(image_path)
-    data = pickle.dumps(frame)
+    chart_json = ch.fileToChart(filename, fmt)
+    # frame = cv2.imread(image_path)
+    data = pickle.dumps(chart_json)
 
     message_size = struct.pack("L", len(data))
 
@@ -36,7 +36,8 @@ def requestData(reqCmd: list):
         return reqCmd[2], reqCmd[4], reqCmd[6]
     else:
         return "H1", reqCmd[2], reqCmd[4]
-    
+
+
 def requestTransactionInfo(reqCmd: list):
     return reqCmd[2], reqCmd[3]
 
@@ -98,11 +99,10 @@ def handler_client_connection(client_connection, client_address):
             client_connection.sendall(size + response)
             print("Image Sent")
 
-
         elif (command == constants.BUY):
             print("Command by client: " + remote_string)
             par, amount = requestTransactionInfo(remote_command)
-            
+
             filenames = par + "-"
             operationType = "BUY"
             price = transactions()

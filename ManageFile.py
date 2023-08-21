@@ -241,4 +241,4 @@ def simulation(min, max, operations):
 # dt_string = date2.strftime("%Y:%m:%d %H:%M")
 # print(dt_string)
 
-editCSV("BTCUSD", "BUY")
+##editCSV("BTCUSD", "BUY")
