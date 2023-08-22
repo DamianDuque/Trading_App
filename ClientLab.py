@@ -102,7 +102,7 @@ def main():
                 bytes(command_to_send, constants.ENCONDING_FORMAT))
             data_received = client_socket.recv(constants.RECV_BUFFER_SIZE)
 
-        print(type(data_received))
+        # print(type(data_received))
         print(data_received.decode(constants.ENCONDING_FORMAT))
         command_to_send = input()
         list_commands = command_to_send.split()
