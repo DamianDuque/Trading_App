@@ -76,7 +76,7 @@ def sameRow(df, operationType, priceUpdate, filenames, validperiodsList, i):
     df.iloc[-1] = newRow
     df = df.drop_duplicates()
     df = df.drop(0)
-    print(df)
+    #print(df)
     print(priceUpdate)
     df.iloc[-1] = newRow
     newPrice = newRow[4]
@@ -105,7 +105,7 @@ def diffRow(df, operationType, dt_string, priceUpdate, filenames, validperiodsLi
 
     newRow[5] = 1
     newPrice = newRow[4]
-    print(df)
+    #print(df)
     print(priceUpdate)
     with open(os.path.join(ruta, filenames + "_" + validperiodsList[i] + ".csv"), 'a', newline='') as f:
         writer = csv.writer(f)
