@@ -6,7 +6,6 @@ import struct
 import threading
 import constants
 import os
-import cv2
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = constants.IP_SERVER
@@ -15,16 +14,16 @@ server_address = constants.IP_SERVER
 def getExt(fmt: str):
     return "." + fmt.lower()
 
+
 def transactions(filenames, operationType):
-    price, newPrice = MF.editCSV(filenames,operationType)
+    price, newPrice = MF.editCSV(filenames, operationType)
     return price, newPrice
-    
 
 
 def imageSendData(filename, fmt):
-    image_path = ch.fileToChart(filename, fmt)
-    frame = cv2.imread(image_path)
-    data = pickle.dumps(frame)
+    chart_json = ch.fileToChart(filename, fmt)
+    # frame = cv2.imread(image_path)
+    data = pickle.dumps(chart_json)
 
     message_size = struct.pack("L", len(data))
 
@@ -36,7 +35,8 @@ def requestData(reqCmd: list):
         return reqCmd[2], reqCmd[4], reqCmd[6]
     else:
         return "H1", reqCmd[2], reqCmd[4]
-    
+
+
 def requestTransactionInfo(reqCmd: list):
     return reqCmd[2], reqCmd[3]
 
@@ -98,14 +98,15 @@ def handler_client_connection(client_connection, client_address):
             client_connection.sendall(size + response)
             print("Image Sent")
 
-
         elif (command == constants.BUY):
             print("Command by client: " + remote_string)
             par, amount = requestTransactionInfo(remote_command)
 
             operationType = "BUY"
             price, newPrice = transactions(par, operationType)
-            response = "You bought at: " + str(price) + " and The current price of the stock is: " + str(newPrice) + " ↑"
+            response = "You bought at: " + \
+                str(price) + " and The current price of the stock is: " + \
+                str(newPrice) + " ↑"
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
             message = ""
@@ -120,7 +121,9 @@ def handler_client_connection(client_connection, client_address):
 
             operationType = "SELL"
             price, newPrice = transactions(par, operationType)
-            response = "You sold at: " + str(price) + " and The current price of the stock is: " + str(newPrice) + " ↓"
+            response = "You sold at: " + \
+                str(price) + " and The current price of the stock is: " + \
+                str(newPrice) + " ↓"
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
             message = ""

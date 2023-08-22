@@ -2,28 +2,20 @@ import socket
 import pickle
 import struct
 import constants
-import cv2
-from colorama import Fore
-from matplotlib import pyplot as plt
 from Parser import *
-import os
+from plotly.io import from_json
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
-def receive_image(name, data, msg_size):
-    print("Image received")
+def receive_json(name, data, msg_size):
+    print("Chart received")
     frame_data = data[:msg_size]
     data = data[msg_size:]
 
-    image_data = pickle.loads(frame_data)
-    downloads_directory = os.path.expanduser("~/Downloads")
-    image_path = os.path.join(downloads_directory, name + '.jpg')
+    json_data = pickle.loads(frame_data)
 
-    plt.imshow(image_data)
-    plt.show()
-    cv2.imwrite(image_path, image_data)
-
-    print(f'Image received and saved as "{image_path}"')
+    fig = from_json(json_data)
+    fig.show()
 
 
 def main():
@@ -69,7 +61,7 @@ def main():
                 data += client_socket.recv(4096)
 
             img_name = list_commands[-1]
-            receive_image(img_name, data, msg_size)
+            receive_json(img_name, data, msg_size)
 
         elif (list_commands[0] == constants.BUY):
             try:
