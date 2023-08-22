@@ -51,7 +51,8 @@ def sameRow(df, operationType, priceUpdate, filenames, validperiodsList, i):
     price = currentRow[4]
 
     if operationType == "BUY":
-        newRow[4] = float(currentRow[4]) + priceUpdate
+        newRow[4] = float(currentRow[4]) * priceUpdate
+        newRow[4] = round(newRow[4],3)
         if newRow[4] > float(currentRow[2]):
             newRow[2] = newRow[4]
             newRow[3] = currentRow[3]
@@ -59,9 +60,10 @@ def sameRow(df, operationType, priceUpdate, filenames, validperiodsList, i):
             newRow[2] = currentRow[2]
             newRow[3] = currentRow[3]
     else: 
-        newRow[4] = float(currentRow[4]) - priceUpdate
+        newRow[4] = float(currentRow[4]) / priceUpdate
+        newRow[4] = round(newRow[4],3)
         if newRow[4] < float(currentRow[3]):
-            newRow[2] = newRow[2]
+            newRow[2] = currentRow[2]
             newRow[3] = newRow[4]
         else:
             newRow[2] = currentRow[2]
@@ -73,6 +75,7 @@ def sameRow(df, operationType, priceUpdate, filenames, validperiodsList, i):
     df = df.drop_duplicates()
     df = df.drop(0)
     print(df)
+    print(priceUpdate)
     df.iloc[-1] = newRow
     newPrice = newRow[4]
     df.to_csv(os.path.join(ruta, filenames + "_" +validperiodsList[i]+ ".csv"), index=False)
@@ -86,17 +89,20 @@ def diffRow(df, operationType, dt_string, priceUpdate, filenames, validperiodsLi
     price = currentRow[4]
 
     if operationType == "BUY":
-        newRow[2] = float(currentRow[4]) + priceUpdate
+        newRow[2] = float(currentRow[4]) * priceUpdate
+        newRow[2] = round(float(newRow[2]),3)
         newRow[3] = newRow[1]
         newRow[4] = newRow[2]
     else: 
         newRow[2] = newRow[1]
-        newRow[3] = float(newRow[1]) - priceUpdate
+        newRow[3] = float(newRow[1]) / priceUpdate
+        newRow[3] = round(float(newRow[3]),3)
         newRow[4] = newRow[3]
 
     newRow[5] = 1
-
     newPrice = newRow[4]
+    print(df)
+    print(priceUpdate)
     with open(os.path.join(ruta, filenames + "_" + validperiodsList[i] + ".csv"), 'a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(newRow)
@@ -104,7 +110,7 @@ def diffRow(df, operationType, dt_string, priceUpdate, filenames, validperiodsLi
     return price, newPrice
 
 def editCSV(filenames, operationType):
-    priceUpdate = 10
+    priceUpdate = random.uniform(1,1.15)
     validperiods = periods.keys()
     validperiodsList = list(validperiods)
     i = 0
@@ -123,10 +129,11 @@ def editCSV(filenames, operationType):
 
         if sameLine == True:
             price, newPrice = sameRow(df, operationType, priceUpdate, filenames, validperiodsList, i)
+            
 
         else:
             price, newPrice = diffRow(df, operationType, dt_string, priceUpdate, filenames, validperiodsList, i)
-
+            
         i=i+1
 
     return price, newPrice
@@ -141,6 +148,3 @@ def simulation(min, max, operations):
         i += 1
     average = count/(operations-2)
     return average
-
-
-editCSV("BTCUSD", "SELL")
