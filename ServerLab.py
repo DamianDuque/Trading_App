@@ -10,7 +10,6 @@ import os
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = constants.IP_SERVER
 
-
 def getExt(fmt: str):
     return "." + fmt.lower()
 
@@ -59,6 +58,8 @@ def main():
     print("Server is running...")
     print("Dir IP:", server_address)
     print("Port:", constants.PORT)
+    global stop_threads
+    stop_threads = False
     server_execution()
 
 # Handler for manage incomming clients conections...
@@ -69,17 +70,18 @@ def handler_client_connection(client_connection, client_address):
         f'New incomming connection is coming from: {client_address[0]}:{client_address[1]}')
 
     is_connected = True
-    while is_connected:
+    while stop_threads is False and is_connected:
         data_recevived = client_connection.recv(constants.RECV_BUFFER_SIZE)
 
         if not data_recevived:
             is_connected = False
+
         remote_string = str(data_recevived.decode(constants.ENCONDING_FORMAT))
         remote_command = remote_string.split()
         command = remote_command[0]
         print(f'Data received from: {client_address[0]}:{client_address[1]}')
 
-        if (command == constants.QUIT):
+        if (command == constants.QUIT) or (stop_threads):
             response = '200 BYE\n'
             client_connection.sendall(
                 response.encode(constants.ENCONDING_FORMAT))
@@ -170,9 +172,10 @@ def server_execution():
                 target=handler_client_connection, args=(client_connection, client_address))
             client_thread.start()
         except KeyboardInterrupt:
+            stop_threads = True
             server_socket.shutdown(socket.SHUT_RDWR)
             server_socket.close()
-            print("closed")
+            print("\nServer closed")
             break
 
     print('Socket is closed...')
