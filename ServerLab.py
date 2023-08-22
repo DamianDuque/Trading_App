@@ -164,10 +164,16 @@ def server_execution():
     server_socket.listen(5)
     print('Socket is listening...')
     while True:
-        client_connection, client_address = server_socket.accept()
-        client_thread = threading.Thread(
-            target=handler_client_connection, args=(client_connection, client_address))
-        client_thread.start()
+        try:
+            client_connection, client_address = server_socket.accept()
+            client_thread = threading.Thread(
+                target=handler_client_connection, args=(client_connection, client_address))
+            client_thread.start()
+        except KeyboardInterrupt:
+            server_socket.shutdown(socket.SHUT_RDWR)
+            server_socket.close()
+            print("closed")
+            break
 
     print('Socket is closed...')
     server_socket.close()
